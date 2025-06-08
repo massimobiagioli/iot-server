@@ -1,0 +1,49 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.venv/
+.pytest_cache/
+.coverage
+
+# Poetry
+.poetry/
+
+# Ruff
+.ruff_cache/
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# MacOs
+.DS_Store
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.dev.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Infra
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+build/
+api_url.txt
+
+# Localstack
+volume
+._volume
+tmpdata
