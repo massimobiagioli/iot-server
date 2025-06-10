@@ -2,12 +2,14 @@ from fastapi import APIRouter, Request
 
 from src import templates
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/devices",
+)
 
 
 @router.get("/")
 async def index(request: Request):
     return templates.TemplateResponse(
         request=request,
-        name="home.html",
+        name="devices.html",
     )

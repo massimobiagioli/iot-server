@@ -1,10 +1,21 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from src.routers.api import router as api_router
 from src.routers.pages import router as pages_router
+from src import mqtt
 
-app = FastAPI()
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    await mqtt.mqtt_startup()
+    yield
+    await mqtt.mqtt_shutdown()
+
+
+app = FastAPI(lifespan=_lifespan)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
