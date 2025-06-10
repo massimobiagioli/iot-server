@@ -11,4 +11,6 @@ class Settings(BaseSettings):
     mqtt_user: str
     mqtt_password: str
 
+    db_url: str
+
     model_config = SettingsConfigDict(env_file=".env")

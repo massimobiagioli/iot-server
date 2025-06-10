@@ -5,6 +5,8 @@ from fastapi_mqtt import FastMQTT, MQTTConfig
 
 from src.config import Settings
 
+from prisma import Prisma
+
 
 @lru_cache
 def get_settings():
@@ -25,5 +27,6 @@ def init_mqtt():
 
 mqtt = init_mqtt()
 
-
 templates = Jinja2Templates(directory="templates")
+
+prisma = Prisma()

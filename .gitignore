@@ -47,3 +47,6 @@ api_url.txt
 volume
 ._volume
 tmpdata
+
+# DB
+data/

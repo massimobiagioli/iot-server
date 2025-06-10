@@ -1,4 +1,4 @@
-.PHONY: help install lint lint-fix format test coverage server
+.PHONY: help install lint lint-fix format test coverage server prisma-generate prisma-db-push
 
 default: help
 
@@ -34,3 +34,9 @@ ifdef port
 else
 	uvicorn src.main:app --host 0.0.0.0 --reload
 endif
+
+prisma-generate: # Generate Prisma client
+	prisma generate
+
+prisma-db-push: # Push Prisma schema to the database
+	prisma db push
