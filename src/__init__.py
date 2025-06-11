@@ -26,6 +26,20 @@ def init_mqtt():
 
 mqtt = init_mqtt()
 
+
+@mqtt.on_connect()
+def handle_mqtt_connect(client, flags, rc, properties):
+    mqtt.client.subscribe("inbound/#")
+
+
+@mqtt.subscribe("inbound/#")
+async def handle_mqtt_message(client, topic, payload, qos, properties):
+    print(
+        "Received message to specific topic: ", topic, payload.decode(), qos, properties
+    )
+    client.publish("outbound/d01", "Hello from Fastapi")
+
+
 templates = Jinja2Templates(directory="templates")
 
 prisma = Prisma()
