@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Request
 
-from src import templates, prisma
+from src import prisma, templates
+from src.queries.find_device_query import (
+    FindDeviceQuery,
+    create_find_device_query_handler,
+)
+from src.queries.list_devices_query import create_list_devices_query_handler
 
 router = APIRouter(
     prefix="/devices",
@@ -9,7 +14,8 @@ router = APIRouter(
 
 @router.get("/")
 async def index(request: Request):
-    devices = await prisma.device.find_many()
+    query_handler = create_list_devices_query_handler(prisma)
+    devices = await query_handler()
 
     return templates.TemplateResponse(
         request=request,
@@ -20,9 +26,8 @@ async def index(request: Request):
 
 @router.get("/{device_id}")
 async def get_device(request: Request, device_id: str):
-    device = await prisma.device.find_unique(
-        where={"id": device_id}
-    )
+    query_handler = create_find_device_query_handler(prisma)
+    device = await query_handler(query=FindDeviceQuery(device_id=device_id))
 
     return templates.TemplateResponse(
         request=request,

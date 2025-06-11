@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.routers.pages import home, devices
+from src.routers.pages import devices, home
 
 router = APIRouter(
     prefix="",

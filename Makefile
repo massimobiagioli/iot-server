@@ -20,13 +20,13 @@ format: # Run formatter
 
 test: # Run tests
 ifdef filter
-	pytest $(filter) -vv
+	@export $$(cat .env.test | xargs) && STAGE=test pytest $(filter) -vv
 else
-	pytest -vv
+	@export $$(cat .env.test | xargs) && STAGE=test pytest -vv
 endif
 
 coverage: # Run tests with coverage
-	pytest tests --cov=src --cov-report term-missing
+	@export $$(cat .env.test | xargs) && STAGE=test pytest tests --cov=src --cov-report term-missing
 
 server: # Start local server
 ifdef port
@@ -39,4 +39,10 @@ prisma-generate: # Generate Prisma client
 	prisma generate
 
 prisma-db-push: # Push Prisma schema to the database
-	prisma db push
+ifdef stage
+	@echo "Using .env.$(stage) file"
+	@export $$(cat .env.$(stage) | xargs) && prisma db push
+else
+	@echo "Using default .env file"
+	@prisma db push
+endif

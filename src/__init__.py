@@ -3,9 +3,8 @@ from functools import lru_cache
 from fastapi.templating import Jinja2Templates
 from fastapi_mqtt import FastMQTT, MQTTConfig
 
-from src.config import Settings
-
 from prisma import Prisma
+from src.config import Settings
 
 
 @lru_cache
