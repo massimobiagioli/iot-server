@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from src import mqtt
-from src.commands import SendInboundMessageCommand, create_send_inbound_message_command_handler
+from src.commands import SendOutboundMessageCommand, create_send_outbound_message_command_handler
 
 router = APIRouter(
     prefix="/devices",
@@ -21,10 +21,10 @@ async def ping_device(device_id: str):
     """Send a ping command to a specific device"""
     try:
         # Create command handler
-        send_message_handler = create_send_inbound_message_command_handler(mqtt.client)
+        send_message_handler = create_send_outbound_message_command_handler(mqtt.client)
         
         # Create ping command
-        ping_command = SendInboundMessageCommand(
+        ping_command = SendOutboundMessageCommand(
             device_id=device_id,
             event_type="ping",
             timestamp=int(time.time())

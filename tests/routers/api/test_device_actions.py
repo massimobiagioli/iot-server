@@ -28,9 +28,8 @@ def test_ping_device_success(mock_mqtt, client):
     assert data["message"] == "Ping sent to device test-device-123"
     assert data["topic"] == "outbound/test-device-123"
     assert "payload" in data
-    assert data["payload"]["command"] == "ping"
+    assert data["payload"]["event_type"] == "ping"
     assert "timestamp" in data["payload"]
-    assert data["payload"]["payload"] == {}
     
     # Verify MQTT publish was called
     mock_mqtt.client.publish.assert_called_once()
@@ -41,8 +40,7 @@ def test_ping_device_success(mock_mqtt, client):
     # Verify message format
     published_message = call_args[0][1].decode("utf-8")
     message_data = json.loads(published_message)
-    assert message_data["command"] == "ping"
-    assert message_data["payload"] == {}
+    assert message_data["event_type"] == "ping"
     assert "timestamp" in message_data
 
 

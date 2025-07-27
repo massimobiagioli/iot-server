@@ -4,15 +4,15 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class SendInboundMessageCommand(BaseModel):
+class SendOutboundMessageCommand(BaseModel):
     device_id: str
     event_type: str
     timestamp: int
     payload: Optional[dict] = None
 
 
-def create_send_inbound_message_command_handler(mqtt_client):
-    async def send_inbound_message_command_handler(command: SendInboundMessageCommand):
+def create_send_outbound_message_command_handler(mqtt_client):
+    async def send_outbound_message_command_handler(command: SendOutboundMessageCommand):
         """Send a message to the outbound MQTT topic for a specific device"""
         
         # Create message in the same format as inbound messages
@@ -38,4 +38,4 @@ def create_send_inbound_message_command_handler(mqtt_client):
             "message": message
         }
 
-    return send_inbound_message_command_handler
+    return send_outbound_message_command_handler
