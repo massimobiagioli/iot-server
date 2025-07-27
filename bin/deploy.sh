@@ -123,16 +123,14 @@ setup_venv() {
 setup_database() {
     log_info "Setting up database..."
     
-    # Install Node.js dependencies if package.json exists
-    if [[ -f "package.json" ]]; then
-        npm install
-    fi
+    # Activate virtual environment
+    source venv/bin/activate
     
-    # Generate Prisma client
-    npx prisma generate
+    # Generate Prisma client using Python
+    python -m prisma generate
     
-    # Push database schema
-    npx prisma db push
+    # Push database schema using Python
+    python -m prisma db push
     
     log_success "Database setup completed"
 }
