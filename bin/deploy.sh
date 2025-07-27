@@ -124,7 +124,7 @@ setup_database() {
     log_info "Setting up database..."
     
     # Activate virtual environment
-    source venv/bin/activate
+    source .venv/bin/activate
     
     # Generate Prisma client using Python
     python -m prisma generate
