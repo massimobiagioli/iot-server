@@ -34,7 +34,8 @@ PYTHON_VERSION="3.11"
 SERVICE_NAME="iot-server"
 SERVICE_USER="pi"
 SERVICE_GROUP="pi"
-INSTALL_DIR="/home/pi/iot-server"
+# INSTALL_DIR can be overridden via environment variable
+INSTALL_DIR="${INSTALL_DIR:-/home/pi/iot-server}"
 SERVICE_PORT="8000"
 
 # Function to check if running as root
@@ -282,6 +283,7 @@ main() {
     check_raspberry_pi
     
     log_info "Starting deployment process..."
+    log_info "Installation directory: $INSTALL_DIR"
     
     # System setup
     update_system

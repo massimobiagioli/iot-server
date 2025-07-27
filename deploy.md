@@ -23,6 +23,29 @@ Questa guida fornisce istruzioni per installare l'IoT Server su un Raspberry Pi 
    make deploy
    ```
 
+   **Personalizzazione Directory di Installazione (Opzionale):**
+   
+   Per installare in una directory diversa da `/home/pi/iot-server`, imposta la variabile di ambiente `INSTALL_DIR`:
+   
+   **Temporanea (solo per la sessione corrente):**
+   ```bash
+   export INSTALL_DIR="/home/massimo/github/iot-server"
+   make deploy
+   ```
+   
+   **Permanente (per tutte le sessioni future):**
+   ```bash
+   # Aggiungi al file di profilo bash
+   echo 'export INSTALL_DIR="/home/massimo/github/iot-server"' >> ~/.bashrc
+   source ~/.bashrc
+   make deploy
+   ```
+   
+   **Oppure in un singolo comando:**
+   ```bash
+   INSTALL_DIR="/home/massimo/github/iot-server" make deploy
+   ```
+
 3. **Configura MQTT (se necessario):**
    ```bash
    nano .env
