@@ -3,6 +3,56 @@
 {% block title %}IoT Server{% endblock %}
 
 {% block content %}
+<!-- Device Statistics Widget -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ device_stats.total }}</h4>
+                        <p class="card-text">Total Devices</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-microchip fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ device_stats.connected }}</h4>
+                        <p class="card-text">Connected</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-wifi fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ device_stats.disconnected }}</h4>
+                        <p class="card-text">Disconnected</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-unlink fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Welcome Section -->
 <div class="row">
     <div class="col-md-8 mx-auto">
         <div class="card shadow-sm">
