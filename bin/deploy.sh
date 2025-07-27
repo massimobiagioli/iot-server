@@ -32,16 +32,14 @@ log_error() {
 # Configuration variables
 PYTHON_VERSION="3.11"
 SERVICE_NAME="iot-server"
-SERVICE_USER="pi"
-SERVICE_GROUP="pi"
 # INSTALL_DIR can be overridden via environment variable
-INSTALL_DIR="${INSTALL_DIR:-/home/pi/iot-server}"
+INSTALL_DIR="${INSTALL_DIR:-/home/$(whoami)/iot-server}"
 SERVICE_PORT="8000"
 
 # Function to check if running as root
 check_root() {
     if [[ $EUID -eq 0 ]]; then
-        log_error "This script should not be run as root. Please run as the pi user."
+        log_error "This script should not be run as root. Please run as a regular user."
         exit 1
     fi
 }
@@ -166,24 +164,35 @@ EOF
 create_systemd_service() {
     log_info "Creating systemd service..."
     
-    sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null << EOF
+    # Get the current user's home directory and ensure proper ownership
+    CURRENT_USER=$(whoami)
+    USER_HOME=$(eval echo ~$CURRENT_USER)
+    
+    sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null <<EOF
 [Unit]
 Description=IoT Server FastAPI Application
 After=network.target
 
 [Service]
 Type=simple
-User=$SERVICE_USER
-Group=$SERVICE_GROUP
+User=$CURRENT_USER
+Group=$CURRENT_USER
 WorkingDirectory=$INSTALL_DIR
-Environment=PATH=$INSTALL_DIR/.venv/bin
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$INSTALL_DIR/.venv/bin
+Environment=HOME=$USER_HOME
+EnvironmentFile=-$INSTALL_DIR/.env
 ExecStart=$INSTALL_DIR/.venv/bin/python -m uvicorn src.main:app --host 0.0.0.0 --port $SERVICE_PORT
 Restart=always
 RestartSec=3
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
 EOF
+    
+    # Ensure proper ownership of the installation directory
+    sudo chown -R $CURRENT_USER:$CURRENT_USER $INSTALL_DIR
     
     sudo systemctl daemon-reload
     sudo systemctl enable $SERVICE_NAME.service

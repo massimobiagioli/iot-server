@@ -260,6 +260,32 @@ sudo chown -R pi:pi /home/pi/iot-server
 sudo systemctl restart iot-server
 ```
 
+### Errore Systemd "code=217/USER"
+
+Se il servizio fallisce con errore `code=217/USER`, significa che systemd non riesce a cambiare all'utente specificato:
+
+```bash
+# 1. Verifica lo stato del servizio
+sudo systemctl status iot-server
+
+# 2. Controlla i log dettagliati
+sudo journalctl -u iot-server -f
+
+# 3. Ricrea il servizio con l'utente corretto
+sudo systemctl stop iot-server
+sudo systemctl disable iot-server
+
+# 4. Rilancia il deploy per ricreare il servizio
+make deploy
+
+# 5. Verifica che l'utente abbia i permessi corretti
+ls -la /home/$(whoami)/
+whoami
+groups
+```
+
+**Nota**: Il deploy script ora usa automaticamente l'utente corrente invece di assumere 'pi', risolvendo questo problema.
+
 ### Configurazioni Avanzate
 
 <details>
