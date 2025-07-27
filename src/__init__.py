@@ -52,23 +52,13 @@ async def handle_device_status_message(client, topic, payload, qos, properties):
     """Handle device status messages from the device_status queue"""
     try:
         payload_str = payload.decode()
-        
-        # Try JSON first, then Python literal eval as fallback
-        try:
-            message = json.loads(payload_str)
-        except json.JSONDecodeError:
-            # Handle Python dict string format
-            import ast
-            message = ast.literal_eval(payload_str)
-        
-        # Use command/query pattern instead of service
+        message = json.loads(payload_str)
         query_handler = create_process_device_status_query_handler(prisma)
         query = ProcessDeviceStatusQuery(message=message)
         await query_handler(query)
-        
-    except (json.JSONDecodeError, ValueError, SyntaxError) as e:
-        print(f"Error decoding device status message: {e}")
-        print(f"Raw payload: {payload.decode()}")
+    except json.JSONDecodeError as e:
+        print(f"Invalid JSON in device status message: {e}")
+        print(f"Raw payload: {payload_str}")
     except Exception as e:
         print(f"Error handling device status message: {e}")
 

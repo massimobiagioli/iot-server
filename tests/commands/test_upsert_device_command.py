@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
 
 from src.commands.upsert_device_command import (
     UpsertDeviceCommand,
@@ -65,7 +66,7 @@ async def test_upsert_device_command_update_existing_device(mock_prisma):
         "is_connected": True,
         "last_seen": 123456789,
     }
-    
+
     mock_prisma.device.find_unique = AsyncMock(return_value=existing_device)
     mock_prisma.device.update = AsyncMock(return_value=updated_device)
 
@@ -90,6 +91,6 @@ async def test_upsert_device_command_update_existing_device(mock_prisma):
             "last_seen": 123456789,
             "device_type": "esp32",
             "device_name": "new_name",
-        }
+        },
     )
     assert result == updated_device

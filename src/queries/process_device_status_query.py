@@ -1,8 +1,8 @@
 from typing import Any, Dict
 
 from pydantic import BaseModel
-from prisma import Prisma
 
+from prisma import Prisma
 from src.commands.upsert_device_command import (
     UpsertDeviceCommand,
     create_upsert_device_command_handler,
@@ -30,18 +30,18 @@ def create_process_device_status_query_handler(prisma: Prisma):
         """
         try:
             message = query.message
-            payload = message.get('payload', {})
-            device_id = payload.get('device_id')
-            device_type = payload.get('device_type')
-            device_name = payload.get('device_name')
-            timestamp = message.get('timestamp')
-            event_type = message.get('event_type')
+            payload = message.get("payload", {})
+            device_id = payload.get("device_id")
+            device_type = payload.get("device_type")
+            device_name = payload.get("device_name")
+            timestamp = message.get("timestamp")
+            event_type = message.get("event_type")
 
             if not all([device_id, device_type, device_name, timestamp, event_type]):
                 print(f"Invalid device status message: {message}")
                 return None
 
-            is_connected = event_type == 'connected'
+            is_connected = event_type == "connected"
 
             # Use the upsert command to create or update the device
             upsert_command_handler = create_upsert_device_command_handler(prisma)
