@@ -48,18 +48,18 @@ async def create_device():
 
     async def _create_device(
         device_id: str = "test-device-123",
-        family: str = "TEST",
+        device_type: str = "esp32",
+        device_name: str = "test-device",
         is_connected: bool = False,
-        display_name: str = "Test Device",
-        notes: str = "Test notes",
+        last_seen: int = None,
     ):
         device = await prisma.device.create(
             data={
                 "id": device_id,
-                "family": family,
+                "device_type": device_type,
+                "device_name": device_name,
                 "is_connected": is_connected,
-                "display_name": display_name,
-                "notes": notes,
+                "last_seen": last_seen,
             }
         )
 

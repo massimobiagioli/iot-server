@@ -3,35 +3,336 @@
 {% block title %}Devices{% endblock %}
 
 {% block content %}
-<div class="container mt-3">
-    <h5>Device List</h5>
-    <hr class="mb-4">
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Device Management</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshDevices()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filters -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search devices...">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="connected">Connected</option>
+                                <option value="disconnected">Disconnected</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="typeFilter">
+                                <option value="">All Types</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" id="pageSize">
+                                <option value="10">10 per page</option>
+                                <option value="25" selected>25 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <table class="table table-hover">
-        <thead>
-            <tr class="table-light">
-                <th>ID</th>
-                <th>Display Name</th>
-                <th>Family</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for device in devices %}
-            <tr>
-                <td><a href="/devices/{{ device.id }}">{{ device.id }}</a></td>
-                <td>{{ device.display_name }}</td>
-                <td>{{ device.family }}</td>
-                <td>
-                    {% if device.is_connected %}
-                        <span class="badge bg-success">Connected</span>
-                    {% else %}
-                        <span class="badge bg-secondary">Disconnected</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="devicesTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="sortable" data-column="id">Device ID <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-column="device_name">Name <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-column="device_type">Type <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-column="is_connected">Status <i class="fas fa-sort"></i></th>
+                                    <th class="sortable" data-column="last_seen">Last Seen <i class="fas fa-sort"></i></th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="devicesTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <span id="tableInfo">Showing 0 to 0 of 0 entries</span>
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="pagination">
+                                <!-- Pagination will be populated by JavaScript -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+.sortable:hover {
+    background-color: #f8f9fa;
+}
+.sortable.asc i::before {
+    content: "\f0de";
+}
+.sortable.desc i::before {
+    content: "\f0dd";
+}
+.badge {
+    font-size: 0.75em;
+}
+.table-responsive {
+    border-radius: 0.375rem;
+}
+@media (max-width: 768px) {
+    .table-responsive table {
+        font-size: 0.875rem;
+    }
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+
+<script>
+let devicesData = {{ devices | tojson | safe }};
+let filteredData = [...devicesData];
+let currentPage = 1;
+let pageSize = 25;
+let sortColumn = '';
+let sortDirection = 'asc';
+
+// Initialize the table
+document.addEventListener('DOMContentLoaded', function() {
+    populateTypeFilter();
+    renderTable();
+    setupEventListeners();
+});
+
+function populateTypeFilter() {
+    const typeFilter = document.getElementById('typeFilter');
+    const types = [...new Set(devicesData.map(device => device.device_type).filter(Boolean))];
+    
+    types.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type.toUpperCase();
+        typeFilter.appendChild(option);
+    });
+}
+
+function setupEventListeners() {
+    // Search input
+    document.getElementById('searchInput').addEventListener('input', function() {
+        currentPage = 1;
+        applyFilters();
+    });
+    
+    // Status filter
+    document.getElementById('statusFilter').addEventListener('change', function() {
+        currentPage = 1;
+        applyFilters();
+    });
+    
+    // Type filter
+    document.getElementById('typeFilter').addEventListener('change', function() {
+        currentPage = 1;
+        applyFilters();
+    });
+    
+    // Page size
+    document.getElementById('pageSize').addEventListener('change', function() {
+        pageSize = parseInt(this.value);
+        currentPage = 1;
+        renderTable();
+    });
+    
+    // Sortable headers
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.column;
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            updateSortHeaders();
+            sortData();
+            renderTable();
+        });
+    });
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const typeFilter = document.getElementById('typeFilter').value;
+    
+    filteredData = devicesData.filter(device => {
+        const matchesSearch = !searchTerm || 
+            device.id.toLowerCase().includes(searchTerm) ||
+            (device.device_name && device.device_name.toLowerCase().includes(searchTerm)) ||
+            (device.display_name && device.display_name.toLowerCase().includes(searchTerm));
+        
+        const matchesStatus = !statusFilter || 
+            (statusFilter === 'connected' && device.is_connected) ||
+            (statusFilter === 'disconnected' && !device.is_connected);
+        
+        const matchesType = !typeFilter || device.device_type === typeFilter;
+        
+        return matchesSearch && matchesStatus && matchesType;
+    });
+    
+    sortData();
+    renderTable();
+}
+
+function sortData() {
+    if (!sortColumn) return;
+    
+    filteredData.sort((a, b) => {
+        let aVal = a[sortColumn];
+        let bVal = b[sortColumn];
+        
+        if (sortColumn === 'is_connected') {
+            aVal = aVal ? 1 : 0;
+            bVal = bVal ? 1 : 0;
+        } else if (sortColumn === 'last_seen') {
+            aVal = aVal || 0;
+            bVal = bVal || 0;
+        } else {
+            aVal = (aVal || '').toString().toLowerCase();
+            bVal = (bVal || '').toString().toLowerCase();
+        }
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+function updateSortHeaders() {
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.classList.remove('asc', 'desc');
+        if (header.dataset.column === sortColumn) {
+            header.classList.add(sortDirection);
+        }
+    });
+}
+
+function renderTable() {
+    const tbody = document.getElementById('devicesTableBody');
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const pageData = filteredData.slice(startIndex, endIndex);
+    
+    tbody.innerHTML = '';
+    
+    if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No devices found</td></tr>';
+    } else {
+        pageData.forEach(device => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><a href="/devices/${device.id}" class="text-decoration-none">${device.id}</a></td>
+                <td>${device.device_name || '-'}</td>
+                <td><span class="badge bg-info">${(device.device_type || '').toUpperCase()}</span></td>
+                <td>
+                    ${device.is_connected 
+                        ? '<span class="badge bg-success"><i class="fas fa-circle"></i> Connected</span>' 
+                        : '<span class="badge bg-secondary"><i class="fas fa-circle"></i> Disconnected</span>'}
+                </td>
+                <td>${device.last_seen ? formatTimestamp(device.last_seen) : '-'}</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="/devices/${device.id}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+    
+    renderPagination();
+    updateTableInfo();
+}
+
+function renderPagination() {
+    const pagination = document.getElementById('pagination');
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    
+    pagination.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = '<a class="page-link" href="#" onclick="changePage(' + (currentPage - 1) + ')">Previous</a>';
+    pagination.appendChild(prevLi);
+    
+    // Page numbers
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = '<a class="page-link" href="#" onclick="changePage(' + i + ')">' + i + '</a>';
+        pagination.appendChild(li);
+    }
+    
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = '<a class="page-link" href="#" onclick="changePage(' + (currentPage + 1) + ')">Next</a>';
+    pagination.appendChild(nextLi);
+}
+
+function changePage(page) {
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderTable();
+    }
+}
+
+function updateTableInfo() {
+    const startIndex = (currentPage - 1) * pageSize + 1;
+    const endIndex = Math.min(currentPage * pageSize, filteredData.length);
+    const total = filteredData.length;
+    
+    document.getElementById('tableInfo').textContent = 
+        `Showing ${total > 0 ? startIndex : 0} to ${endIndex} of ${total} entries`;
+}
+
+function formatTimestamp(timestamp) {
+    if (!timestamp) return '-';
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString();
+}
+
+function refreshDevices() {
+    window.location.reload();
+}
+</script>
 {% endblock %}

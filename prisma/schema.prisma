@@ -11,8 +11,10 @@ datasource db {
 
 model Device {
   id            String   @id
-  family        String
+  device_type   String
+  device_name   String
   is_connected  Boolean
-  display_name  String?
-  notes         String?
+  last_seen     Int?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 }

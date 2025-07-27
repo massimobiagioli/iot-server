@@ -13,13 +13,24 @@
                 <td class="ps-4 fw-semibold table-light" style="width: 30%">ID</td>
                 <td>{{ device.id }}</td>
             </tr>
+
             <tr>
-                <td class="ps-4 fw-semibold table-light">Display Name</td>
-                <td>{{ device.display_name }}</td>
+                <td class="ps-4 fw-semibold table-light">Device Type</td>
+                <td><span class="badge bg-info">{{ device.device_type.upper() }}</span></td>
             </tr>
             <tr>
-                <td class="ps-4 fw-semibold table-light">Family</td>
-                <td>{{ device.family }}</td>
+                <td class="ps-4 fw-semibold table-light">Device Name</td>
+                <td>{{ device.device_name }}</td>
+            </tr>
+            <tr>
+                <td class="ps-4 fw-semibold table-light">Last Seen</td>
+                <td>
+                    {% if device.last_seen %}
+                        <script>document.write(new Date({{ device.last_seen }} * 1000).toLocaleString());</script>
+                    {% else %}
+                        Never
+                    {% endif %}
+                </td>
             </tr>
             <tr>
                 <td class="ps-4 fw-semibold table-light">Status</td>

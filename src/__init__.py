@@ -1,3 +1,4 @@
+import json
 from functools import lru_cache
 
 from fastapi.templating import Jinja2Templates
@@ -5,6 +6,10 @@ from fastapi_mqtt import FastMQTT, MQTTConfig
 
 from prisma import Prisma
 from src.config import Settings
+from src.queries.process_device_status_query import (
+    ProcessDeviceStatusQuery,
+    create_process_device_status_query_handler,
+)
 
 
 @lru_cache
@@ -30,6 +35,8 @@ mqtt = init_mqtt()
 @mqtt.on_connect()
 def handle_mqtt_connect(client, flags, rc, properties):
     mqtt.client.subscribe("inbound/#")
+    mqtt.client.subscribe("device_status")
+    print("MQTT connected and subscribed to topics")
 
 
 @mqtt.subscribe("inbound/#")
@@ -38,6 +45,32 @@ async def handle_mqtt_message(client, topic, payload, qos, properties):
         "Received message to specific topic: ", topic, payload.decode(), qos, properties
     )
     client.publish("outbound/d01", "Hello from Fastapi")
+
+
+@mqtt.subscribe("device_status")
+async def handle_device_status_message(client, topic, payload, qos, properties):
+    """Handle device status messages from the device_status queue"""
+    try:
+        payload_str = payload.decode()
+        
+        # Try JSON first, then Python literal eval as fallback
+        try:
+            message = json.loads(payload_str)
+        except json.JSONDecodeError:
+            # Handle Python dict string format
+            import ast
+            message = ast.literal_eval(payload_str)
+        
+        # Use command/query pattern instead of service
+        query_handler = create_process_device_status_query_handler(prisma)
+        query = ProcessDeviceStatusQuery(message=message)
+        await query_handler(query)
+        
+    except (json.JSONDecodeError, ValueError, SyntaxError) as e:
+        print(f"Error decoding device status message: {e}")
+        print(f"Raw payload: {payload.decode()}")
+    except Exception as e:
+        print(f"Error handling device status message: {e}")
 
 
 templates = Jinja2Templates(directory="templates")

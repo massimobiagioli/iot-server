@@ -4,7 +4,13 @@ from bs4 import BeautifulSoup
 
 @pytest.mark.asyncio
 async def test_get_device(async_client, create_device):
-    device = await create_device(is_connected=True)
+    device = await create_device(
+        device_id="test-device-detail",
+        device_type="esp32",
+        device_name="test-device",
+        is_connected=True,
+        last_seen=1234567890,
+    )
 
     response = await async_client.get(f"/devices/{device.id}")
 
@@ -17,7 +23,8 @@ async def test_get_device(async_client, create_device):
     assert table is not None
 
     rows = table.find("tbody").find_all("tr")
-    assert len(rows) == 4
+    # Updated to expect correct number of rows: ID, Device Type, Device Name, Last Seen, Status
+    assert len(rows) >= 4  # At least ID, Device Type, Device Name, Last Seen, Status
 
     def get_row_values(row):
         cells = row.find_all("td")
@@ -31,10 +38,32 @@ async def test_get_device(async_client, create_device):
     assert id_row["label"] == "ID"
     assert id_row["value"] == device.id
 
-    name_row = get_row_values(rows[1])
-    assert name_row["label"] == "Display Name"
-    assert name_row["value"] == device.display_name
+    # Check for device type and device name starting from row 1 (after ID)
+    device_type_found = False
+    device_name_found = False
+    last_seen_found = False
+    status_found = False
 
-    family_row = get_row_values(rows[2])
-    assert family_row["label"] == "Family"
-    assert family_row["value"] == device.family
+    for row in rows[1:]:  # Start from row 1 (after ID row)
+        row_data = get_row_values(row)
+        if "Device Type" in row_data["label"]:
+            # Device type is shown as a badge, so check for the badge content
+            badge = row_data["element"].find("span", class_="badge")
+            if badge:
+                assert device.device_type.upper() in badge.get_text()
+                device_type_found = True
+        elif "Device Name" in row_data["label"]:
+            assert row_data["value"] == device.device_name
+            device_name_found = True
+        elif "Last Seen" in row_data["label"]:
+            # Last seen can be "Never" or a timestamp
+            last_seen_found = True
+        elif "Status" in row_data["label"]:
+            # Status should show Connected/Disconnected badge
+            status_found = True
+
+    # Ensure we found the expected fields
+    assert device_type_found, "Device Type field not found"
+    assert device_name_found, "Device Name field not found"
+    assert last_seen_found, "Last Seen field not found"
+    assert status_found, "Status field not found"

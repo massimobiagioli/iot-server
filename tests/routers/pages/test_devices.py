@@ -4,32 +4,50 @@ from bs4 import BeautifulSoup
 
 @pytest.mark.asyncio
 async def test_index(async_client, create_device):
-    device = await create_device()
+    device = await create_device(
+        device_id="test-device-123",
+        device_type="esp32",
+        device_name="test-device",
+        is_connected=False,
+        last_seen=1234567890,
+    )
 
     response = await async_client.get("/devices/")
 
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
 
+    # Check that the page contains the device management card
     soup = BeautifulSoup(response.text, "html.parser")
 
-    tbody = soup.find("tbody")
-    assert tbody is not None
+    # Check for the main card structure
+    card = soup.find("div", class_="card")
+    assert card is not None
 
-    rows = tbody.find_all("tr")
-    assert len(rows) == 1
+    # Check for the card header with title
+    card_header = card.find("div", class_="card-header")
+    assert card_header is not None
+    assert "Device Management" in card_header.get_text()
 
-    cells = rows[0].find_all("td")
-    assert len(cells) == 4
+    # Check for the table structure
+    table = soup.find("table", id="devicesTable")
+    assert table is not None
 
-    id_link = cells[0].find("a")
-    assert id_link["href"] == f"/devices/{device.id}"
-    assert id_link.string == str(device.id)
+    # Check table headers
+    headers = table.find("thead").find_all("th")
+    expected_headers = ["Device ID", "Name", "Type", "Status", "Last Seen", "Actions"]
+    for i, expected_header in enumerate(expected_headers):
+        assert expected_header in headers[i].get_text()
 
-    assert cells[1].string == "Test Device"
-    assert cells[2].string == "TEST"
+    # Check that JavaScript data is embedded
+    script_tags = soup.find_all("script")
+    device_data_found = False
+    for script in script_tags:
+        if script.string and "devicesData" in script.string:
+            device_data_found = True
+            # Check that device data contains our test device
+            assert device.id in script.string
+            assert "esp32" in script.string
+            break
 
-    status_badge = cells[3].find("span")
-    assert "badge" in status_badge["class"]
-    assert "bg-secondary" in status_badge["class"]
-    assert status_badge.string == "Disconnected"
+    assert device_data_found, "Device data not found in JavaScript"

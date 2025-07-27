@@ -1,4 +1,4 @@
-.PHONY: help install lint lint-fix format test coverage server prisma-generate prisma-db-push
+.PHONY: help install lint lint-fix format test coverage server prisma-generate prisma-db-push deploy
 
 default: help
 
@@ -46,3 +46,8 @@ else
 	@echo "Using default .env file"
 	@prisma db push
 endif
+
+deploy: # Deploy IoT Server to Raspberry Pi (automated installation)
+	@echo "🚀 Starting automated deployment..."
+	@chmod +x bin/deploy.sh
+	@./bin/deploy.sh
