@@ -1,0 +1,32 @@
+services:
+  mariadb-dev:
+    image: mariadb:10.11.14
+    environment:
+      MYSQL_ROOT_PASSWORD: R00t!@Dev
+      MYSQL_DATABASE: iot-server-dev
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: Devz0!!
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mariadb-test:
+    image: mariadb:10.11.14
+    environment:
+      MYSQL_ROOT_PASSWORD: R00t!@Test
+      MYSQL_DATABASE: iot-server-test
+      MYSQL_USER: tester
+      MYSQL_PASSWORD: Tester0!!
+    ports:
+      - "3307:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
