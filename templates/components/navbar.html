@@ -1,4 +1,4 @@
-<nav class="blue">
+<nav>
   <div class="nav-wrapper">
     <a href="#" class="brand-logo" style="display: flex; align-items: center; gap: 8px;">
       <img src="/static/img/favicon.jpg" alt="favicon" style="height:32px;width:32px;vertical-align:middle;">
@@ -9,6 +9,11 @@
       <li><a href="sass.html">Sass</a></li>
       <li><a href="badges.html">Components</a></li>
       <li><a href="collapsible.html">JavaScript</a></li>
+      {% if user %}
+        <li><span class="nav-user">{{ user.username }} ({{ user.role }})</span></li>
+      {% else %}
+        <li><a href="/login">Login</a></li>
+      {% endif %}
     </ul>
   </div>
 </nav>
@@ -17,4 +22,9 @@
   <li><a href="sass.html">Sass</a></li>
   <li><a href="badges.html">Components</a></li>
   <li><a href="collapsible.html">JavaScript</a></li>
+  {% if user %}
+    <li><span class="nav-user">{{ user.username }} ({{ user.role }})</span></li>
+  {% else %}
+    <li><a href="/login">Login</a></li>
+  {% endif %}
 </ul>

@@ -27,7 +27,7 @@
 ### Output / Side Effects
 | Event | Action |
 | :--- | :--- |
-| **Success (200 OK)** | Persist Token (JWT) in Secure Storage/Cookie; redirect to `/`. |
+| **Success (200 OK)** | Persist user id in Secure Storage/Cookie; redirect to `/`. |
 | **Failure (401/403)** | UI Alert: "Invalid credentials". |
 | **Network Error** | UI Alert: "Connection error, please try again later". |
 
@@ -35,15 +35,15 @@
 
 ## 4. Functional Workflow
 
-1.  **Entry Point:** User navigates to the `/login` route.
+1.  **Entry Point:** User navigates to the `/auth/login` route.
 2.  **Auth Check:** * If a valid token exists, redirect automatically to `/`.
-    * If no valid token exists, render the `login.html` page.
-3.  **User Action:** User inputs credentials and call the `/do_login` POST route.
+    * If no valid token exists, render the `templates/auth/login.html` page.
+3.  **User Action:** User inputs credentials and call the `/auth/do_login` POST route.
 4.  **Client-Side Validation:** The system validates field requirements before triggering the network request.
 5.  **Submission:** Execute an asynchronous POST request to the backend auth endpoint.
 6.  **Response Handling:**
     * Disable the submit button and show a loading spinner during the request.
-    * **On Success:** Store a cookie with the JWT token (if `remember_me` is true, set a longer expiration) and redirect to the homepage (`/`).
+    * **On Success:** Store a cookie with the user id (if `remember_me` is true, set a longer expiration) and redirect to the homepage (`/`).
     * **On Error:** Clear the password field and display the appropriate error message to the user.
 
 ---

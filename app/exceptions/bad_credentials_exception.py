@@ -1,0 +1,2 @@
+class BadCredentialsException(Exception):
+    pass
