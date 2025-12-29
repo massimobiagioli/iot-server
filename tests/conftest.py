@@ -1,5 +1,5 @@
 import pytest
-
+import uuid
 from app.models import User, Role
 from app.lib.passwords import hash_password
 
@@ -14,6 +14,7 @@ def mock_db():
 @pytest.fixture
 def get_user_data():
     def _get_user_data(
+        id=uuid.uuid4(),
         username="testuser",
         password="rightpass",
         firstname="Test",
@@ -21,6 +22,7 @@ def get_user_data():
         role=Role.USER,
     ):
         return User(
+            id=id,
             username=username,
             password=hash_password(password),
             firstname=firstname,
