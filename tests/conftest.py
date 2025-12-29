@@ -1,7 +1,15 @@
 import pytest
 import uuid
+from fastapi.testclient import TestClient
+from app.main import server
 from app.models import User, Role
 from app.lib.passwords import hash_password
+
+
+@pytest.fixture
+def client():
+    with TestClient(server) as c:
+        yield c
 
 
 @pytest.fixture
