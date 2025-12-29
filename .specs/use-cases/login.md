@@ -1,63 +1,76 @@
+
 # Use Case Specification: User Login
 
 ## 1. Overview
-**ID:** UC-001
-**Title:** User Authentication
-**Description:** Allows a registered user to gain access to the platform using their email and password credentials.
+**ID:** UC-001  
+**Title:** User Authentication  
+**Description:** Allows a registered user to access the platform using their username and password credentials.
 
 ---
 
 ## 2. Context & Project Reference
-* **Project Structure:** Refer to the provided `project-structure.md` for folder hierarchy, naming conventions, and architectural patterns.
-* **Data Model:** Refer to the provided `data-model.md` for detailed information on the data structures and relationships.
-* **Target Components:** * UI: Login Form / Presentation layer.
-    * API: Service layer for authentication endpoint integration.
+- **Project Structure:** See `project-structure.md` for folder hierarchy and architectural patterns.
+- **Data Model:** See `data-model.md` for user schema and relationships.
+- **Target Components:**  
+    - UI: Login Form (`/auth/login`)
+    - API: Authentication endpoints (`/auth/do_login`)
 
 ---
 
 ## 3. Data Schema (Input/Output)
 
 ### Input Data
-| Field | Type | Validation |
-| :--- | :--- | :--- |
-| `username` | String | Must be a valid email format, required. |
-| `password` | String | Minimum 8 characters, required. |
-| `remember_me` | Boolean | Optional (default: false). |
+| Field         | Type    | Validation                        |
+|---------------|---------|-----------------------------------|
+| `username`    | String  | Required, must be a valid username|
+| `password`    | String  | Required, minimum 8 characters    |
+| `remember_me` | Boolean | Optional (default: false)         |
 
 ### Output / Side Effects
-| Event | Action |
-| :--- | :--- |
-| **Success (200 OK)** | Persist user id in Secure Storage/Cookie; redirect to `/`. |
-| **Failure (401/403)** | UI Alert: "Invalid credentials". |
-| **Network Error** | UI Alert: "Connection error, please try again later". |
+| Event                | Action                                                                 |
+|----------------------|-----------------------------------------------------------------------|
+| **Success (200 OK)** | Set a cookie with user id (`sid`). If `remember_me` is true, set long expiration; otherwise, session cookie. Redirect to `/`. |
+| **Failure (401/403)**| Show error message "Invalid credentials" on login page.               |
+| **User Not Found**   | Show error message "User not found" on login page.                    |
+| **Network Error**    | Show error message "Connection error, please try again later".        |
 
 ---
 
 ## 4. Functional Workflow
 
-1.  **Entry Point:** User navigates to the `/auth/login` route.
-2.  **Auth Check:** * If a valid token exists, redirect automatically to `/`.
-    * If no valid token exists, render the `templates/auth/login.html` page.
-3.  **User Action:** User inputs credentials and call the `/auth/do_login` POST route.
-4.  **Client-Side Validation:** The system validates field requirements before triggering the network request.
-5.  **Submission:** Execute an asynchronous POST request to the backend auth endpoint.
-6.  **Response Handling:**
-    * Disable the submit button and show a loading spinner during the request.
-    * **On Success:** Store a cookie with the user id (if `remember_me` is true, set a longer expiration) and redirect to the homepage (`/`).
-    * **On Error:** Clear the password field and display the appropriate error message to the user.
+1. **Entry Point:** User navigates to `/auth/login`.
+2. **Auth Check:**  
+     - If a valid session cookie (`sid`) exists and matches a user, redirect to `/dashboard`.
+     - If not, render the login page.
+3. **User Action:** User submits credentials via `/auth/do_login` (POST).
+4. **Server-Side Validation:**  
+     - Validate credentials using the `GetUser` service.
+     - On success, set cookie `sid` with user id. If `remember_me` is checked, set a long expiration; otherwise, use a session cookie.
+     - On failure, return error and re-render login page with message.
+5. **Redirect:**  
+     - On successful login, redirect to `/` (which will further redirect to `/dashboard` if authenticated).
+     - On error, stay on login page and show error.
 
 ---
 
 ## 5. Constraints & Business Rules
-* **Security:** Never store passwords in plain text within the local state or logs.
-* **UI/UX:** The submit button must be disabled if the form is invalid or a request is "pending".
-* **Persistence:** If `rememberMe` is checked, the session/token should persist across browser restarts.
-* **Coding Standard:** * Ensure strict types for all input/output interfaces.
-    * Follow the architectural separation defined in `project-structure.md` (e.g., keep UI components separate from business logic/services).
+- **Security:**  
+    - Passwords are never stored or logged in plain text.
+    - Session management is handled via secure HTTP-only cookies.
+- **UI/UX:**  
+    - The submit button is disabled if the form is invalid or a request is pending.
+    - Error messages are shown inline on the login page.
+- **Persistence:**  
+    - If `remember_me` is checked, the session persists across browser restarts.
+    - Otherwise, session expires when browser is closed.
+- **Coding Standard:**  
+    - Use strict types for all input/output.
+    - Keep UI, business logic, and service layers separated as per project structure.
 
 ---
 
-## 6. Implementation Instructions for GPT Agent
-* Generate code that strictly adheres to the provided `project-structure.md`.
-* Ensure modularity
-* Use existing UI library components if mentioned in the project structure.
+## 6. Implementation Notes
+- The authentication flow relies on a FastAPI middleware to set `request.state.current_user` based on the `sid` cookie.
+- The login route sets the cookie and redirects; if `remember_me` is not set, the cookie is a session cookie.
+- The dashboard and other protected routes read `request.state.current_user` to determine authentication status.
+- All error handling and redirects are managed server-side, with clear feedback to the user.
