@@ -12,11 +12,19 @@ def mock_db():
 
 
 @pytest.fixture
-def user_data():
-    return User(
+def get_user_data():
+    def _get_user_data(
         username="testuser",
-        password=hash_password("rightpass"),
+        password="rightpass",
         firstname="Test",
         lastname="User",
         role=Role.USER,
-    )
+    ):
+        return User(
+            username=username,
+            password=hash_password(password),
+            firstname=firstname,
+            lastname=lastname,
+            role=role,
+        )
+    return _get_user_data
