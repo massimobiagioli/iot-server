@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from app.routes.api.health import router as health_router
-from app.routes.dashboard import router as dashboard_router
-from app.routes.auth.login import router as login_router
+from app.routes.api.health import health_router
+from app.routes.dashboard import dashboard_router
+from app.routes.auth import login_router
 from app.routes.index import router as index_router
 
 
