@@ -11,6 +11,7 @@ from app.exceptions import UserNotFoundException, BadCredentialsException
 
 COOKIE_ID = "sid"
 COOKIE_EXPIRE = 60 * 60 * 24 * 30
+COOKIE_EXPIRE_SHORT = 60 * 30
 
 
 router = APIRouter()
@@ -36,10 +37,10 @@ async def do_login(
     try:
         user = get_user_service.execute(username, password)
         response = RedirectResponse(url="/", status_code=HTTP_303_SEE_OTHER)
-        if remember_me == "on":
-            response.set_cookie(
-                key=COOKIE_ID, value=str(user.id), httponly=True, max_age=COOKIE_EXPIRE
-            )
+        max_age = COOKIE_EXPIRE if remember_me == "on" else COOKIE_EXPIRE_SHORT
+        response.set_cookie(
+            key=COOKIE_ID, value=str(user.id), httponly=True, max_age=max_age
+        )
         return response
     except UserNotFoundException as e:
         logger.warning(f"UserNotFoundException: {e} (username: {username})")
