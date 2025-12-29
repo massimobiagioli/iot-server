@@ -13,7 +13,7 @@ wheels/
 .env
 
 # Ruff
-.ruff-cache/
+.ruff_cache/
 
 # Pytest
 .pytest_cache/
