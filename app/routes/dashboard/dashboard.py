@@ -7,8 +7,9 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    current_user = getattr(request.state, "current_user", None)
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
-        context={"request": request},
+        context={"request": request, "user": current_user},
     )

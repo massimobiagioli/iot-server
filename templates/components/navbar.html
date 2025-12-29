@@ -1,3 +1,7 @@
+<ul id="dropdown-user" class="dropdown-content">
+  <li><a href="#!">Profile</a></li>
+  <li><a href="#!">Logout</a></li>
+</ul>
 <nav>
   <div class="nav-wrapper">
     <a href="#" class="brand-logo" style="display: flex; align-items: center; gap: 8px;">
@@ -9,11 +13,7 @@
       <li><a href="sass.html">Sass</a></li>
       <li><a href="badges.html">Components</a></li>
       <li><a href="collapsible.html">JavaScript</a></li>
-      {% if user %}
-        <li><span class="nav-user">{{ user.username }} ({{ user.role }})</span></li>
-      {% else %}
-        <li><a href="/login">Login</a></li>
-      {% endif %}
+      <li><a class="dropdown-trigger" href="#!" data-target="dropdown-user">{{ user.username }}<i class="material-icons right">arrow_drop_down</i></a></li>
     </ul>
   </div>
 </nav>
@@ -22,9 +22,6 @@
   <li><a href="sass.html">Sass</a></li>
   <li><a href="badges.html">Components</a></li>
   <li><a href="collapsible.html">JavaScript</a></li>
-  {% if user %}
-    <li><span class="nav-user">{{ user.username }} ({{ user.role }})</span></li>
-  {% else %}
-    <li><a href="/login">Login</a></li>
-  {% endif %}
+  <li><a href="collapsible.html">{{ user.username }} Profile</a></li>
+  <li><a href="collapsible.html">Logout</a></li>
 </ul>
