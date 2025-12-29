@@ -17,6 +17,9 @@ class UserBase(SQLModel):
     lastname: str = Field(nullable=False)
     role: Role = Field(default=Role.GUEST, nullable=False)
 
+    def is_admin(self) -> bool:
+        return self.role == Role.ADMIN
+
 
 class User(UserBase, table=True):
     id: uuid.UUID = Field(
