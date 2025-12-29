@@ -12,7 +12,7 @@ from sqlmodel import SQLModel
 from alembic import context
 
 # Import models
-from app.models.user import User
+from app.models import User
 
 load_dotenv()
 

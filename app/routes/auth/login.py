@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 from typing import Annotated
 from fastapi import Depends
-from app.services.get_user import GetUser
+from app.services import GetUser
 from app import templates
 
 

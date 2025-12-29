@@ -1,6 +1,6 @@
 import pytest
 
-from app.models.user import User, Role
+from app.models import User, Role
 from app.lib.passwords import hash_password
 
 
@@ -27,4 +27,5 @@ def get_user_data():
             lastname=lastname,
             role=role,
         )
+
     return _get_user_data

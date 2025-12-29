@@ -1,5 +1,5 @@
 import pytest
-from app.services.get_user import GetUser
+from app.services import GetUser
 from app.exceptions import UserNotFoundException, BadCredentialsException
 
 

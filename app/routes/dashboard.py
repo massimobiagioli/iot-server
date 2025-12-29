@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from app import templates
 from sqlmodel import select
-from app.models.user import User
+from app.models import User
 
 router = APIRouter()
 

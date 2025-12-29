@@ -1,6 +1,6 @@
 from app.exceptions import UserNotFoundException, BadCredentialsException
 from app.lib.passwords import verify_password
-from app.models.user import User
+from app.models import User
 from app.lib.database import DBSession
 from sqlmodel import select
 
