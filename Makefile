@@ -30,8 +30,8 @@ sync:             ## Synchronize Python environment with uv
 start-dev:        ## Start development environment
 	$(FASTAPI) run app/main.py
 
-console:          ## Start a Python console with app context
-	$(UV) run python -i -m app.main
+console:          ## Start an IPython shell con shell_context.py
+	PYTHONPATH=. $(UV) run ipython --no-autoindent --no-banner -i shell_context.py
 
 create-migration: ## Create migration
 	$(ALEMBIC) revision --autogenerate -m "$(message)"
