@@ -3,8 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 import logging
 from starlette.status import HTTP_303_SEE_OTHER
 from typing import Annotated
-from fastapi import Depends
-from app.services import GetUser
+from app.services import GetUserService
 from app import templates
 from app.exceptions import UserNotFoundException, BadCredentialsException
 
@@ -31,7 +30,7 @@ async def do_login(
     username: Annotated[str, Form()],
     password: Annotated[str, Form()],
     request: Request,
-    get_user_service: Annotated[GetUser, Depends()],
+    get_user_service: GetUserService,
     remember_me: Annotated[str | None, Form()] = None,
 ):
     try:

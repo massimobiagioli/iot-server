@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from app.main import server
 from app.models import User, Role
 from app.lib.passwords import hash_password
+from unittest.mock import MagicMock
 
 
 @pytest.fixture
@@ -13,10 +14,16 @@ def client():
 
 
 @pytest.fixture
-def mock_db():
-    from unittest.mock import MagicMock
-
+def mock_session():
     return MagicMock()
+
+
+@pytest.fixture
+def mock_uow():
+    mock = MagicMock()
+    mock.user_repository = MagicMock()
+    mock.__enter__.return_value = mock
+    return mock
 
 
 @pytest.fixture
