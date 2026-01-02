@@ -1,16 +1,16 @@
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
-
-
-COOKIE_ID = "sid"
+from app import SettingsProvider
 
 
 router = APIRouter()
 
 
 @router.get("/logout")
-async def logout():
+async def logout(
+    settings: SettingsProvider,
+):
     response = RedirectResponse(url="/auth/login", status_code=HTTP_303_SEE_OTHER)
-    response.delete_cookie(key=COOKIE_ID)
+    response.delete_cookie(key=settings.cookie_id)
     return response

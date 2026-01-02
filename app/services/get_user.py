@@ -15,11 +15,12 @@ class GetUser:
 
     def execute(self, username: str, password: str = None) -> User:
         with self.unit_of_work(self.session) as uow:
-            user = uow.users.get_user(username)
+            user = uow.users.get_user_by_username(username)
             if not user:
                 raise UserNotFoundException(f"User '{username}' not found")
             if not password or not verify_password(password, user.password):
                 raise BadCredentialsException("Bad credentials provided")
+            self.session.expunge(user)
             return user
 
 

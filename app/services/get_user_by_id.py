@@ -15,9 +15,10 @@ class GetUserById:
 
     def execute(self, user_id: str) -> User:
         with self.unit_of_work(self.session) as uow:
-            user = uow.users.get_user_by_id(str(uuid.UUID(user_id)))
+            user = uow.users.get_user_by_id(uuid.UUID(user_id))
             if not user:
                 raise UserNotFoundException(f"User id '{user_id}' not found")
+            self.session.expunge(user)
             return user
 
 
