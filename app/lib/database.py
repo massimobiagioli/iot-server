@@ -1,13 +1,12 @@
 from typing import Annotated
-
 from fastapi import Depends
 from sqlmodel import Session, create_engine
+from app import get_settings
 
-import os
 
+settings = get_settings()
 
-db_url = os.getenv("DATABASE_URL")
-engine = create_engine(db_url)
+engine = create_engine(settings.database_url)
 
 
 def get_session():

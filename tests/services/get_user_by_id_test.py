@@ -3,8 +3,8 @@ from app.services import GetUserById
 from app.exceptions import UserNotFoundException
 
 
-def test_get_by_id_found(mock_session, mock_uow, get_user_data, new_uuid_as_string):
-    user = get_user_data()
+def test_get_by_id_found(mock_session, mock_uow, user_builder, new_uuid_as_string):
+    user = user_builder()
     mock_uow.users.get_by_id.return_value = user
     service = GetUserById(session=mock_session, unit_of_work=lambda _: mock_uow)
     result = service(new_uuid_as_string())
