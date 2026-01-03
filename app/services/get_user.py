@@ -13,9 +13,9 @@ class GetUser:
         self.session = session
         self.unit_of_work = unit_of_work
 
-    def execute(self, username: str, password: str = None) -> User:
+    def __call__(self, username: str, password: str = None) -> User:
         with self.unit_of_work(self.session) as uow:
-            user = uow.users.get_user_by_username(username)
+            user = uow.users.get_by_username(username)
             if not user:
                 raise UserNotFoundException(f"User '{username}' not found")
             if not password or not verify_password(password, user.password):

@@ -6,14 +6,14 @@ import uuid
 
 def test_get_by_id_found(mock_session, mock_uow, get_user_data):
     user = get_user_data()
-    mock_uow.users.get_user_by_id.return_value = user
+    mock_uow.users.get_by_id.return_value = user
     service = GetUserById(session=mock_session, unit_of_work=lambda _: mock_uow)
-    result = service.execute(str(user.id))
+    result = service(str(user.id))
     assert result == user
 
 
 def test_get_by_id_not_found(mock_session, mock_uow):
-    mock_uow.users.get_user_by_id.return_value = None
+    mock_uow.users.get_by_id.return_value = None
     service = GetUserById(session=mock_session, unit_of_work=lambda _: mock_uow)
     with pytest.raises(UserNotFoundException):
-        service.execute(str(uuid.uuid4()))
+        service(str(uuid.uuid4()))
