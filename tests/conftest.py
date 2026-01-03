@@ -46,3 +46,8 @@ def get_user_data():
         )
 
     return _get_user_data
+
+
+@pytest.fixture
+def new_uuid_as_string():
+    return lambda: str(uuid.uuid4())
