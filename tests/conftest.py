@@ -25,6 +25,14 @@ def mock_session():
     return MagicMock()
 
 
+@pytest.fixture
+def mock_uow():
+    mock = MagicMock()
+    mock.user_repository = MagicMock()
+    mock.__enter__.return_value = mock
+    return mock
+
+
 @pytest.fixture(scope="function")
 def db_session():
     SQLModel.metadata.create_all(engine)
@@ -58,6 +66,7 @@ def user_builder():
             lastname=lastname,
             role=role,
         )
+
     return _builder
 
 
@@ -69,15 +78,8 @@ def store_user(db_session, user_builder):
         db_session.commit()
         db_session.refresh(user)
         return user
+
     return _store_user
-
-
-@pytest.fixture
-def mock_uow():
-    mock = MagicMock()
-    mock.user_repository = MagicMock()
-    mock.__enter__.return_value = mock
-    return mock
 
 
 @pytest.fixture
