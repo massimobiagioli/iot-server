@@ -30,7 +30,7 @@ async def do_login(
     remember_me: Annotated[str | None, Form()] = None,
 ):
     try:
-        user = get_user_service.execute(username, password)
+        user = get_user_service(username, password)
         response = RedirectResponse(url="/", status_code=HTTP_303_SEE_OTHER)
         max_age = (
             settings.cookie_expire

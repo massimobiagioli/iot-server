@@ -15,7 +15,7 @@ class SetCurrentUserMiddleware(BaseHTTPMiddleware):
             session = next(session_gen)
             try:
                 get_user_service = GetUserById(session, unit_of_work=UnitOfWork)
-                user = get_user_service.execute(sid)
+                user = get_user_service(sid)
                 request.state.current_user = user
             except UserNotFoundException:
                 request.state.current_user = None
